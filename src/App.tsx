@@ -1,20 +1,56 @@
 import React, { useState, useEffect } from 'react';
 import { Sidebar } from './components/Sidebar';
+import { HomeDashboard } from './components/HomeDashboard';
+import { DiscoverEventsFeed } from './components/DiscoverEventsFeed';
 import { MonitoredClubs } from './components/MonitoredClubs';
-import { AddClubForm } from './components/AddClubForm';
+import { AiEventDiscoveryView } from './components/AiEventDiscoveryView';
+import { CommunityView } from './components/CommunityView';
+import { ResourcesView } from './components/ResourcesView';
+import { EventDetailsModal } from './components/EventDetailsModal';
+import { ProfileSettingsModal } from './components/ProfileSettingsModal';
 import { ClubEventsView } from './components/ClubEventsView';
-import type { Club, ClubEvent, ViewState } from './types';
+import { InstagramAuthModal } from './components/InstagramAuthModal';
+import { DockedAgentBar } from './components/DockedAgentBar';
+import type { 
+  Club, 
+  CampusEvent, 
+  DashboardStats, 
+  NavTab,
+  InstagramAuthSession
+} from './types';
 
 export const App: React.FC = () => {
+  const [currentTab, setCurrentTab] = useState<NavTab>('home');
   const [clubs, setClubs] = useState<Club[]>([]);
-  const [viewState, setViewState] = useState<ViewState>({ type: 'clubs_list' });
-  const [selectedClub, setSelectedClub] = useState<Club | null>(null);
-  const [selectedClubEvents, setSelectedClubEvents] = useState<ClubEvent[]>([]);
+  const [events, setEvents] = useState<CampusEvent[]>([]);
+  const [stats, setStats] = useState<DashboardStats>({
+    totalClubs: 0,
+    upcomingEvents: 0,
+    ongoingEvents: 0,
+    discoveredThisWeek: 0,
+  });
+
+  const [selectedEventForDetails, setSelectedEventForDetails] = useState<CampusEvent | null>(null);
+  const [selectedClubForEvents, setSelectedClubForEvents] = useState<Club | null>(null);
+  const [clubSpecificEvents, setClubSpecificEvents] = useState<CampusEvent[]>([]);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [showInstagramAuthModal, setShowInstagramAuthModal] = useState(false);
+  const [instagramSession, setInstagramSession] = useState<InstagramAuthSession | null>(null);
   const [scanningClubId, setScanningClubId] = useState<string | null>(null);
+  const [clubForDiscoveryScan, setClubForDiscoveryScan] = useState<Club | null>(null);
+  const [dockedSimulation, setDockedSimulation] = useState<{
+    club: Club;
+    stageName: string;
+    stageIndex: number;
+    totalStages: number;
+    elapsedSeconds: number;
+    progressPercent: number;
+  } | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [tinyFishStatus, setTinyFishStatus] = useState<{ configured: boolean; wallet?: any }>({ configured: false });
 
   useEffect(() => {
-    fetchClubs();
+    fetchInitialData();
   }, []);
 
   const showToast = (msg: string) => {
@@ -22,6 +58,40 @@ export const App: React.FC = () => {
     setTimeout(() => {
       setToastMessage(null);
     }, 4500);
+  };
+
+  const fetchInitialData = async () => {
+    await Promise.all([
+      fetchClubs(),
+      fetchEvents(),
+      fetchStats(),
+      fetchTinyFishStatus(),
+      fetchInstagramSession(),
+    ]);
+  };
+
+  const fetchInstagramSession = async () => {
+    try {
+      const res = await fetch('/api/auth/instagram/status');
+      if (res.ok) {
+        const data = await res.json();
+        setInstagramSession(data.session);
+      }
+    } catch (err) {
+      console.warn('Failed to fetch Instagram session:', err);
+    }
+  };
+
+  const fetchTinyFishStatus = async () => {
+    try {
+      const res = await fetch('/api/status');
+      if (res.ok) {
+        const data = await res.json();
+        setTinyFishStatus({ configured: data.configured, wallet: data.wallet });
+      }
+    } catch (err) {
+      console.warn('Failed to fetch status:', err);
+    }
   };
 
   const fetchClubs = async () => {
@@ -38,27 +108,42 @@ export const App: React.FC = () => {
     }
   };
 
-  const fetchEventsForClub = async (clubId: string) => {
+  const fetchEvents = async () => {
     try {
-      const res = await fetch(`/api/events?clubId=${encodeURIComponent(clubId)}`);
+      const res = await fetch('/api/events');
       if (res.ok) {
         const data = await res.json();
-        setSelectedClubEvents(data.events || []);
-        if (data.club) setSelectedClub(data.club);
+        if (Array.isArray(data.events)) {
+          setEvents(data.events);
+        }
       }
     } catch (err) {
-      console.error('Failed to fetch events for club:', err);
+      console.error('Failed to fetch events:', err);
     }
   };
 
-  // 1. Add club handler
-  const handleClubAdded = (newClub: Club) => {
-    fetchClubs();
-    showToast(`Added "${newClub.name}" (${newClub.handle}) to monitored clubs.`);
-    setViewState({ type: 'clubs_list' });
+  const fetchStats = async () => {
+    try {
+      const res = await fetch('/api/stats');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.stats) {
+          setStats(data.stats);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch stats:', err);
+    }
   };
 
-  // 2. Remove club handler
+  // Add Club Handler
+  const handleClubAdded = (newClub: Club) => {
+    fetchClubs();
+    fetchStats();
+    showToast(`Club "${newClub.name}" (${newClub.handle}) successfully registered.`);
+  };
+
+  // Remove Club Handler
   const handleRemoveClub = async (clubId: string) => {
     try {
       const res = await fetch('/api/clubs/delete', {
@@ -68,12 +153,11 @@ export const App: React.FC = () => {
       });
 
       if (res.ok) {
-        showToast('Club removed successfully.');
-        fetchClubs();
-        if (selectedClub && selectedClub.id === clubId) {
-          setViewState({ type: 'clubs_list' });
-          setSelectedClub(null);
-          setSelectedClubEvents([]);
+        showToast('Club removed from monitoring.');
+        await fetchClubs();
+        await fetchStats();
+        if (selectedClubForEvents && selectedClubForEvents.id === clubId) {
+          setSelectedClubForEvents(null);
         }
       }
     } catch (err) {
@@ -81,48 +165,35 @@ export const App: React.FC = () => {
     }
   };
 
-  // 3. Scan club Instagram posts handler (Real TinyFish Agent)
-  const handleScanClub = async (club: Club) => {
+  // Scan Club Handler (runs simulated agent workflow in AI Event Discovery)
+  const handleScanClub = (club: Club) => {
+    if (scanningClubId === club.id) {
+      showToast(`Scan already in progress for ${club.name}.`);
+      return;
+    }
     setScanningClubId(club.id);
-    showToast(`TinyFish agent dispatched to inspect ${club.handle}...`);
+    setClubForDiscoveryScan(club);
+    setSelectedClubForEvents(null);
+    setCurrentTab('discovery');
+    showToast(`Dispatched simulated AI agent for ${club.name}...`);
+  };
 
+  // View specific club events
+  const fetchEventsForClub = async (clubId: string) => {
     try {
-      const res = await fetch('/api/scan', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ clubId: club.id }),
-      });
-
-      const data = await res.json();
-
-      // Refresh clubs list to get updated status & eventCount from backend storage
-      await fetchClubs();
-
-      if (data.status === 'login_wall') {
-        showToast(`Instagram Login Wall: ${club.handle} requires login credentials.`);
-      } else if (data.success) {
-        showToast(data.message || `Scan complete for ${club.name}.`);
-      } else {
-        showToast(data.error || 'Scan failed.');
+      const res = await fetch(`/api/events?clubId=${encodeURIComponent(clubId)}`);
+      if (res.ok) {
+        const data = await res.json();
+        setClubSpecificEvents(data.events || []);
+        if (data.club) setSelectedClubForEvents(data.club);
       }
-
-      // If we are currently viewing this club's events, refresh them
-      if (viewState.type === 'club_events' && viewState.clubId === club.id) {
-        fetchEventsForClub(club.id);
-      }
-    } catch (err: any) {
-      console.error('Scan error:', err);
-      showToast('Network error during scan.');
-      await fetchClubs();
-    } finally {
-      setScanningClubId(null);
+    } catch (err) {
+      console.error('Failed to fetch events for club:', err);
     }
   };
 
-  // 4. View events handler
-  const handleViewEvents = (club: Club) => {
-    setSelectedClub(club);
-    setViewState({ type: 'club_events', clubId: club.id });
+  const handleViewClubEvents = (club: Club) => {
+    setSelectedClubForEvents(club);
     fetchEventsForClub(club.id);
   };
 
@@ -153,53 +224,167 @@ export const App: React.FC = () => {
         </div>
       )}
 
-      {/* Sidebar Navigation */}
+      {/* Persistent Left Sidebar */}
       <Sidebar
-        currentTab={viewState.type === 'add_club' ? 'add_club' : 'clubs'}
+        currentTab={currentTab}
         onSelectTab={(tab) => {
-          if (tab === 'add_club') {
-            setViewState({ type: 'add_club' });
-          } else {
-            setViewState({ type: 'clubs_list' });
-            fetchClubs();
-          }
+          setSelectedClubForEvents(null);
+          setCurrentTab(tab);
+          fetchInitialData();
         }}
         clubsCount={clubs.length}
+        eventsCount={events.length}
+        isInstagramConnected={instagramSession?.status === 'connected'}
+        onOpenInstagramAuth={() => setShowInstagramAuthModal(true)}
+        onOpenSettings={() => setShowSettingsModal(true)}
       />
 
-      {/* Main Workspace Area */}
+      {/* Main Content Area */}
       <main className="main-content">
-        {viewState.type === 'clubs_list' && (
-          <MonitoredClubs
-            clubs={clubs}
-            onAddClubClick={() => setViewState({ type: 'add_club' })}
-            onScanClub={handleScanClub}
-            onViewEvents={handleViewEvents}
-            onRemoveClub={handleRemoveClub}
-            scanningClubId={scanningClubId}
-          />
-        )}
-
-        {viewState.type === 'add_club' && (
-          <AddClubForm
-            onBack={() => setViewState({ type: 'clubs_list' })}
-            onClubAdded={handleClubAdded}
-          />
-        )}
-
-        {viewState.type === 'club_events' && selectedClub && (
+        {/* If viewing a single club's events directly */}
+        {selectedClubForEvents ? (
           <ClubEventsView
-            club={selectedClub}
-            events={selectedClubEvents}
+            club={selectedClubForEvents}
+            events={clubSpecificEvents}
             onBack={() => {
-              setViewState({ type: 'clubs_list' });
-              fetchClubs();
+              setSelectedClubForEvents(null);
+              fetchInitialData();
             }}
             onScanAgain={handleScanClub}
-            isScanning={scanningClubId === selectedClub.id}
+            isScanning={scanningClubId === selectedClubForEvents.id}
           />
+        ) : (
+          <>
+            {/* 1. Home Dashboard */}
+            {currentTab === 'home' && (
+              <HomeDashboard
+                stats={stats}
+                clubs={clubs}
+                events={events}
+                onNavigateTab={(tab) => setCurrentTab(tab)}
+                onViewEventDetails={(evt) => setSelectedEventForDetails(evt)}
+                onOpenAddClub={() => setCurrentTab('discovery')}
+              />
+            )}
+
+            {/* 2. Discover Events — Unified Campus Feed */}
+            {currentTab === 'events' && (
+              <DiscoverEventsFeed
+                events={events}
+                onOpenDetails={(evt) => setSelectedEventForDetails(evt)}
+                onNavigateToScan={() => setCurrentTab('discovery')}
+              />
+            )}
+
+            {/* 3. Monitored Clubs */}
+            {currentTab === 'clubs' && (
+              <MonitoredClubs
+                clubs={clubs}
+                onAddClubClick={() => setCurrentTab('discovery')}
+                onScanClub={handleScanClub}
+                onViewEvents={handleViewClubEvents}
+                onRemoveClub={handleRemoveClub}
+                onUpdateClub={() => {
+                  fetchClubs();
+                  showToast('Club details updated.');
+                }}
+                scanningClubId={scanningClubId}
+              />
+            )}
+
+            {/* 4. AI Event Discovery (Core 3-Screen Feature) */}
+            {currentTab === 'discovery' && (
+              <AiEventDiscoveryView
+                clubs={clubs}
+                onClubAdded={handleClubAdded}
+                onViewFeed={() => {
+                  fetchEvents();
+                  fetchStats();
+                  setCurrentTab('events');
+                }}
+                onRefreshClubs={() => {
+                  fetchClubs();
+                  fetchEvents();
+                  fetchStats();
+                  fetchInstagramSession();
+                  setScanningClubId(null);
+                }}
+                instagramSession={instagramSession}
+                onOpenInstagramAuth={() => setShowInstagramAuthModal(true)}
+                initialClubForScan={clubForDiscoveryScan}
+                onClearInitialClubForScan={() => setClubForDiscoveryScan(null)}
+                onActiveSimulationUpdate={(data) => setDockedSimulation(data)}
+              />
+            )}
+
+            {/* 5. Community */}
+            {currentTab === 'community' && (
+              <CommunityView
+                events={events}
+                clubs={clubs}
+                onViewEvent={(evt) => setSelectedEventForDetails(evt)}
+              />
+            )}
+
+            {/* 6. Resources */}
+            {currentTab === 'resources' && (
+              <ResourcesView />
+            )}
+          </>
         )}
       </main>
+
+      {/* Floating Docked Agent Activity Bar (Visible across other tabs while simulation runs) */}
+      {currentTab !== 'discovery' && dockedSimulation && (
+        <DockedAgentBar
+          club={dockedSimulation.club}
+          stageName={dockedSimulation.stageName}
+          stageIndex={dockedSimulation.stageIndex}
+          totalStages={dockedSimulation.totalStages}
+          elapsedSeconds={dockedSimulation.elapsedSeconds}
+          progressPercent={dockedSimulation.progressPercent}
+          onOpenFullView={() => setCurrentTab('discovery')}
+          onCancel={() => {
+            setDockedSimulation(null);
+            setScanningClubId(null);
+            showToast('Simulated agent run cancelled.');
+          }}
+        />
+      )}
+
+      {/* Global Event Details Modal */}
+      {selectedEventForDetails && (
+        <EventDetailsModal
+          event={selectedEventForDetails}
+          onClose={() => setSelectedEventForDetails(null)}
+        />
+      )}
+
+      {/* Profile Settings Modal */}
+      {showSettingsModal && (
+        <ProfileSettingsModal
+          onClose={() => setShowSettingsModal(false)}
+          tinyFishConfigured={tinyFishStatus.configured}
+          walletBalance={tinyFishStatus.wallet?.balance}
+          instagramSession={instagramSession}
+          onOpenInstagramAuth={() => {
+            setShowSettingsModal(false);
+            setShowInstagramAuthModal(true);
+          }}
+        />
+      )}
+
+      {/* Instagram Session Authentication Modal (Option A: TinyFish Persistent Profiles) */}
+      {showInstagramAuthModal && (
+        <InstagramAuthModal
+          session={instagramSession}
+          onClose={() => setShowInstagramAuthModal(false)}
+          onSessionUpdated={(updated) => {
+            setInstagramSession(updated);
+            showToast(updated.status === 'connected' ? 'Instagram session connected & saved in TinyFish profile!' : 'Instagram session disconnected.');
+          }}
+        />
+      )}
     </div>
   );
 };

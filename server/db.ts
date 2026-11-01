@@ -70,10 +70,22 @@ export interface ScanJob {
   completedAt: string | null;
 }
 
+export interface InstagramAuthSession {
+  profileId: string;
+  profileName: string;
+  status: 'connected' | 'disconnected' | 'expired';
+  signedInSites: string[];
+  lastConnectedAt: string | null;
+  expiresAt: string | null;
+  activeSessionId?: string | null;
+  setupBaseUrl?: string | null;
+}
+
 const DATA_DIR = path.resolve(process.cwd(), 'data');
 const CLUBS_FILE = path.join(DATA_DIR, 'clubs.json');
 const EVENTS_FILE = path.join(DATA_DIR, 'events.json');
 const JOBS_FILE = path.join(DATA_DIR, 'scan_jobs.json');
+const AUTH_FILE = path.join(DATA_DIR, 'auth_session.json');
 
 // Supabase client instance (optional fallback to JSON if credentials are not configured)
 let supabase: SupabaseClient | null = null;
@@ -104,6 +116,18 @@ function ensureDataDir() {
   }
   if (!fs.existsSync(JOBS_FILE)) {
     fs.writeFileSync(JOBS_FILE, '[]', 'utf-8');
+  }
+  if (!fs.existsSync(AUTH_FILE)) {
+    fs.writeFileSync(AUTH_FILE, JSON.stringify({
+      profileId: 'prof_2e8ad9c73af146a8',
+      profileName: 'CampusConnect Instagram Session',
+      status: 'disconnected',
+      signedInSites: [],
+      lastConnectedAt: null,
+      expiresAt: null,
+      activeSessionId: null,
+      setupBaseUrl: null
+    }, null, 2), 'utf-8');
   }
 }
 
@@ -557,3 +581,51 @@ export function getDashboardStats(): {
     discoveredThisWeek,
   };
 }
+
+// --- INSTAGRAM AUTH SESSION PERSISTENCE ---
+
+export function getInstagramSession(): InstagramAuthSession {
+  ensureDataDir();
+  try {
+    const raw = fs.readFileSync(AUTH_FILE, 'utf-8');
+    return JSON.parse(raw);
+  } catch (err) {
+    return {
+      profileId: 'prof_2e8ad9c73af146a8',
+      profileName: 'CampusConnect Instagram Session',
+      status: 'disconnected',
+      signedInSites: [],
+      lastConnectedAt: null,
+      expiresAt: null,
+      activeSessionId: null,
+      setupBaseUrl: null
+    };
+  }
+}
+
+export function saveInstagramSession(updates: Partial<InstagramAuthSession>): InstagramAuthSession {
+  const current = getInstagramSession();
+  const updated: InstagramAuthSession = {
+    ...current,
+    ...updates,
+  };
+  ensureDataDir();
+  try {
+    fs.writeFileSync(AUTH_FILE, JSON.stringify(updated, null, 2), 'utf-8');
+  } catch (err) {
+    console.error('[DB] Error saving auth_session.json:', err);
+  }
+  return updated;
+}
+
+export function clearInstagramSession(): InstagramAuthSession {
+  return saveInstagramSession({
+    status: 'disconnected',
+    signedInSites: [],
+    lastConnectedAt: null,
+    expiresAt: null,
+    activeSessionId: null,
+    setupBaseUrl: null
+  });
+}
+

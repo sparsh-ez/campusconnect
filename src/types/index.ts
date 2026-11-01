@@ -18,6 +18,12 @@ export interface Club {
   lastScanStatus: 'never_scanned' | 'scanning' | 'success' | 'login_wall' | 'failed';
   lastScanMessage: string | null;
   eventCount: number;
+
+  // Compatibility aliases
+  platform?: 'instagram' | 'linkedin' | 'both';
+  eventsCount?: number;
+  lastScanned?: string;
+  status?: 'active' | 'rate_limited' | 'login_required' | 'idle';
 }
 
 export type EventClassification = 'ongoing' | 'upcoming' | 'past' | 'unconfirmed';
@@ -46,6 +52,14 @@ export interface CampusEvent {
   discoveredAt: string;
   createdAt: string;
   platform: 'instagram' | 'linkedin';
+
+  // Compatibility aliases for legacy views
+  event_name?: string;
+  organizer?: string;
+  handle?: string;
+  registration_url?: string | null;
+  source_url?: string;
+  verification_status?: VerificationStatus;
 }
 
 export interface TimelineLog {
@@ -78,7 +92,23 @@ export interface DashboardStats {
   discoveredThisWeek: number;
 }
 
+export interface InstagramAuthSession {
+  profileId: string;
+  profileName: string;
+  status: 'connected' | 'disconnected' | 'expired';
+  signedInSites: string[];
+  lastConnectedAt: string | null;
+  expiresAt: string | null;
+  activeSessionId?: string | null;
+  setupBaseUrl?: string | null;
+}
+
 // Aliases for component compatibility
 export type ClubEvent = CampusEvent;
 export type DiscoveredEvent = CampusEvent;
 export type MonitoredClub = Club;
+export type ActiveNav = NavTab;
+export type ViewState = 
+  | { type: 'clubs_list' }
+  | { type: 'add_club' }
+  | { type: 'club_events'; clubId: string };

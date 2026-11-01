@@ -1,0 +1,460 @@
+[
+  {
+    "id": "job-1793519646459-phubes",
+    "clubId": "club-1793516696854-5mzx4v",
+    "clubName": "Lingua Franca",
+    "clubHandle": "@linguafranca.gcet",
+    "status": "completed",
+    "currentStep": 6,
+    "stepName": "Scan Complete — No Events Found",
+    "logs": [
+      {
+        "step": 1,
+        "text": "Connecting to TinyFish runner for @linguafranca.gcet...",
+        "status": "active",
+        "timestamp": "2026-11-01T07:54:06.459Z"
+      },
+      {
+        "step": 1,
+        "text": "Connecting to TinyFish browser engine",
+        "status": "active",
+        "timestamp": "2026-11-01T07:54:06.462Z"
+      },
+      {
+        "step": 2,
+        "text": "Navigating with authenticated Instagram browser profile (prof_2e8ad9c73af146a8)",
+        "status": "active",
+        "timestamp": "2026-11-01T07:54:06.472Z"
+      },
+      {
+        "step": 3,
+        "text": "Reading accessible posts and profile header",
+        "status": "active",
+        "timestamp": "2026-11-01T07:54:21.443Z"
+      },
+      {
+        "step": 4,
+        "text": "Inspecting page content for event announcements",
+        "status": "active",
+        "timestamp": "2026-11-01T07:54:21.450Z"
+      },
+      {
+        "step": 5,
+        "text": "Extracting structured event metadata",
+        "status": "active",
+        "timestamp": "2026-11-01T07:54:21.458Z"
+      },
+      {
+        "step": 6,
+        "text": "Saving 0 discovered event(s) to database",
+        "status": "done",
+        "timestamp": "2026-11-01T07:54:21.464Z"
+      }
+    ],
+    "eventsExtracted": 0,
+    "extractedEvents": [],
+    "error": null,
+    "createdAt": "2026-11-01T07:54:06.459Z",
+    "completedAt": "2026-11-01T07:54:21.469Z"
+  },
+  {
+    "id": "job-1793519644908-dsdkbu",
+    "clubId": "club-1793518231639-sc4nul",
+    "clubName": "GFG",
+    "clubHandle": "@geeksforgeeks_gcet",
+    "status": "completed",
+    "currentStep": 6,
+    "stepName": "Scan Complete — No Events Found",
+    "logs": [
+      {
+        "step": 1,
+        "text": "Connecting to TinyFish runner for @geeksforgeeks_gcet...",
+        "status": "active",
+        "timestamp": "2026-11-01T07:54:04.908Z"
+      },
+      {
+        "step": 1,
+        "text": "Connecting to TinyFish browser engine",
+        "status": "active",
+        "timestamp": "2026-11-01T07:54:04.914Z"
+      },
+      {
+        "step": 2,
+        "text": "Navigating with authenticated Instagram browser profile (prof_2e8ad9c73af146a8)",
+        "status": "active",
+        "timestamp": "2026-11-01T07:54:04.925Z"
+      },
+      {
+        "step": 3,
+        "text": "Reading accessible posts and profile header",
+        "status": "active",
+        "timestamp": "2026-11-01T07:54:28.287Z"
+      },
+      {
+        "step": 4,
+        "text": "Inspecting page content for event announcements",
+        "status": "active",
+        "timestamp": "2026-11-01T07:54:28.293Z"
+      },
+      {
+        "step": 5,
+        "text": "Extracting structured event metadata",
+        "status": "active",
+        "timestamp": "2026-11-01T07:54:28.298Z"
+      },
+      {
+        "step": 6,
+        "text": "Saving 0 discovered event(s) to database",
+        "status": "done",
+        "timestamp": "2026-11-01T07:54:28.304Z"
+      }
+    ],
+    "eventsExtracted": 0,
+    "extractedEvents": [],
+    "error": null,
+    "createdAt": "2026-11-01T07:54:04.908Z",
+    "completedAt": "2026-11-01T07:54:28.310Z"
+  },
+  {
+    "id": "job-1793518922330-1gs2ly",
+    "clubId": "club-1793516696854-5mzx4v",
+    "clubName": "Lingua Franca",
+    "clubHandle": "@linguafranca.gcet",
+    "status": "completed",
+    "currentStep": 6,
+    "stepName": "Scan Complete — No Events Found",
+    "logs": [
+      {
+        "step": 1,
+        "text": "Connecting to TinyFish runner for @linguafranca.gcet...",
+        "status": "active",
+        "timestamp": "2026-11-01T07:42:02.330Z"
+      },
+      {
+        "step": 1,
+        "text": "Connecting to TinyFish browser engine",
+        "status": "active",
+        "timestamp": "2026-11-01T07:42:02.334Z"
+      },
+      {
+        "step": 2,
+        "text": "Navigating browser agent to https://www.instagram.com/linguafranca.gcet/",
+        "status": "active",
+        "timestamp": "2026-11-01T07:42:02.341Z"
+      },
+      {
+        "step": 3,
+        "text": "Reading accessible posts and profile header",
+        "status": "active",
+        "timestamp": "2026-11-01T07:42:37.423Z"
+      },
+      {
+        "step": 4,
+        "text": "Inspecting page content for event announcements",
+        "status": "active",
+        "timestamp": "2026-11-01T07:42:37.427Z"
+      },
+      {
+        "step": 5,
+        "text": "Extracting structured event metadata",
+        "status": "active",
+        "timestamp": "2026-11-01T07:42:37.432Z"
+      },
+      {
+        "step": 6,
+        "text": "Saving 0 discovered event(s) to database",
+        "status": "done",
+        "timestamp": "2026-11-01T07:42:37.439Z"
+      }
+    ],
+    "eventsExtracted": 0,
+    "extractedEvents": [],
+    "error": null,
+    "createdAt": "2026-11-01T07:42:02.330Z",
+    "completedAt": "2026-11-01T07:42:37.445Z"
+  },
+  {
+    "id": "job-1793518920059-8nq54p",
+    "clubId": "club-1793518231639-sc4nul",
+    "clubName": "GFG",
+    "clubHandle": "@geeksforgeeks_gcet",
+    "status": "login_wall",
+    "currentStep": 4,
+    "stepName": "Instagram Authentication Required",
+    "logs": [
+      {
+        "step": 1,
+        "text": "Connecting to TinyFish runner for @geeksforgeeks_gcet...",
+        "status": "active",
+        "timestamp": "2026-11-01T07:42:00.059Z"
+      },
+      {
+        "step": 1,
+        "text": "Connecting to TinyFish browser engine",
+        "status": "active",
+        "timestamp": "2026-11-01T07:42:00.064Z"
+      },
+      {
+        "step": 2,
+        "text": "Navigating browser agent to https://www.instagram.com/geeksforgeeks_gcet/",
+        "status": "active",
+        "timestamp": "2026-11-01T07:42:00.075Z"
+      },
+      {
+        "step": 3,
+        "text": "Reading accessible posts and profile header",
+        "status": "active",
+        "timestamp": "2026-11-01T07:42:12.195Z"
+      },
+      {
+        "step": 4,
+        "text": "Inspecting page content for event announcements",
+        "status": "active",
+        "timestamp": "2026-11-01T07:42:12.201Z"
+      },
+      {
+        "step": 4,
+        "text": "Instagram login challenge detected. Public guest session restricted.",
+        "status": "error",
+        "timestamp": "2026-11-01T07:42:12.207Z"
+      }
+    ],
+    "eventsExtracted": 0,
+    "extractedEvents": [],
+    "error": "Instagram Login Wall: Profile requires authentication. Instagram redirected the agent to a login page (\"See everyday moments from your close friends\"). Public guest browsing without saved session credentials is restricted.",
+    "createdAt": "2026-11-01T07:42:00.059Z",
+    "completedAt": "2026-11-01T07:42:12.213Z"
+  },
+  {
+    "id": "job-1793518515468-ha15tf",
+    "clubId": "club-1793518231639-sc4nul",
+    "clubName": "GFG",
+    "clubHandle": "@geeksforgeeks_gcet",
+    "status": "completed",
+    "currentStep": 6,
+    "stepName": "Scan Complete — No Events Found",
+    "logs": [
+      {
+        "step": 1,
+        "text": "Connecting to TinyFish runner for @geeksforgeeks_gcet...",
+        "status": "active",
+        "timestamp": "2026-11-01T07:35:15.468Z"
+      },
+      {
+        "step": 1,
+        "text": "Connecting to TinyFish browser engine",
+        "status": "active",
+        "timestamp": "2026-11-01T07:35:15.475Z"
+      },
+      {
+        "step": 2,
+        "text": "Navigating browser agent to https://www.instagram.com/geeksforgeeks_gcet/",
+        "status": "active",
+        "timestamp": "2026-11-01T07:35:15.488Z"
+      },
+      {
+        "step": 3,
+        "text": "Reading accessible posts and profile header",
+        "status": "active",
+        "timestamp": "2026-11-01T07:35:29.615Z"
+      },
+      {
+        "step": 4,
+        "text": "Inspecting page content for event announcements",
+        "status": "active",
+        "timestamp": "2026-11-01T07:35:29.623Z"
+      },
+      {
+        "step": 5,
+        "text": "Extracting structured event metadata",
+        "status": "active",
+        "timestamp": "2026-11-01T07:35:29.631Z"
+      },
+      {
+        "step": 6,
+        "text": "Saving 0 discovered event(s) to database",
+        "status": "done",
+        "timestamp": "2026-11-01T07:35:29.640Z"
+      }
+    ],
+    "eventsExtracted": 0,
+    "extractedEvents": [],
+    "error": null,
+    "createdAt": "2026-11-01T07:35:15.468Z",
+    "completedAt": "2026-11-01T07:35:29.649Z"
+  },
+  {
+    "id": "job-1793518240828-3ndxsi",
+    "clubId": "club-1793518231639-sc4nul",
+    "clubName": "GFG",
+    "clubHandle": "@geeksforgeeks_gcet",
+    "status": "completed",
+    "currentStep": 6,
+    "stepName": "Scan Complete — No Events Found",
+    "logs": [
+      {
+        "step": 1,
+        "text": "Connecting to TinyFish runner for @geeksforgeeks_gcet...",
+        "status": "active",
+        "timestamp": "2026-11-01T07:30:40.828Z"
+      },
+      {
+        "step": 1,
+        "text": "Connecting to TinyFish browser engine",
+        "status": "active",
+        "timestamp": "2026-11-01T07:30:40.832Z"
+      },
+      {
+        "step": 2,
+        "text": "Navigating browser agent to https://www.instagram.com/geeksforgeeks_gcet/",
+        "status": "active",
+        "timestamp": "2026-11-01T07:30:40.838Z"
+      },
+      {
+        "step": 3,
+        "text": "Reading accessible posts and profile header",
+        "status": "active",
+        "timestamp": "2026-11-01T07:30:55.059Z"
+      },
+      {
+        "step": 4,
+        "text": "Inspecting page content for event announcements",
+        "status": "active",
+        "timestamp": "2026-11-01T07:30:55.067Z"
+      },
+      {
+        "step": 5,
+        "text": "Extracting structured event metadata",
+        "status": "active",
+        "timestamp": "2026-11-01T07:30:55.073Z"
+      },
+      {
+        "step": 6,
+        "text": "Saving 0 discovered event(s) to database",
+        "status": "done",
+        "timestamp": "2026-11-01T07:30:55.077Z"
+      }
+    ],
+    "eventsExtracted": 0,
+    "extractedEvents": [],
+    "error": null,
+    "createdAt": "2026-11-01T07:30:40.828Z",
+    "completedAt": "2026-11-01T07:30:55.083Z"
+  },
+  {
+    "id": "job-1793518234128-dyytws",
+    "clubId": "club-1793516696854-5mzx4v",
+    "clubName": "Lingua Franca",
+    "clubHandle": "@linguafranca.gcet",
+    "status": "completed",
+    "currentStep": 6,
+    "stepName": "Scan Complete — No Events Found",
+    "logs": [
+      {
+        "step": 1,
+        "text": "Connecting to TinyFish runner for @linguafranca.gcet...",
+        "status": "active",
+        "timestamp": "2026-11-01T07:30:34.128Z"
+      },
+      {
+        "step": 1,
+        "text": "Connecting to TinyFish browser engine",
+        "status": "active",
+        "timestamp": "2026-11-01T07:30:34.134Z"
+      },
+      {
+        "step": 2,
+        "text": "Navigating browser agent to https://www.instagram.com/linguafranca.gcet/",
+        "status": "active",
+        "timestamp": "2026-11-01T07:30:34.142Z"
+      },
+      {
+        "step": 3,
+        "text": "Reading accessible posts and profile header",
+        "status": "active",
+        "timestamp": "2026-11-01T07:30:56.320Z"
+      },
+      {
+        "step": 4,
+        "text": "Inspecting page content for event announcements",
+        "status": "active",
+        "timestamp": "2026-11-01T07:30:56.326Z"
+      },
+      {
+        "step": 5,
+        "text": "Extracting structured event metadata",
+        "status": "active",
+        "timestamp": "2026-11-01T07:30:56.333Z"
+      },
+      {
+        "step": 6,
+        "text": "Saving 0 discovered event(s) to database",
+        "status": "done",
+        "timestamp": "2026-11-01T07:30:56.339Z"
+      }
+    ],
+    "eventsExtracted": 0,
+    "extractedEvents": [],
+    "error": null,
+    "createdAt": "2026-11-01T07:30:34.128Z",
+    "completedAt": "2026-11-01T07:30:56.343Z"
+  },
+  {
+    "id": "job-1793518194185-4qy5ep",
+    "clubId": "club-1793516696854-5mzx4v",
+    "clubName": "Lingua Franca",
+    "clubHandle": "@linguafranca.gcet",
+    "status": "completed",
+    "currentStep": 6,
+    "stepName": "Scan Complete — No Events Found",
+    "logs": [
+      {
+        "step": 1,
+        "text": "Connecting to TinyFish runner for @linguafranca.gcet...",
+        "status": "active",
+        "timestamp": "2026-11-01T07:29:54.185Z"
+      },
+      {
+        "step": 1,
+        "text": "Connecting to TinyFish browser engine",
+        "status": "active",
+        "timestamp": "2026-11-01T07:29:54.190Z"
+      },
+      {
+        "step": 2,
+        "text": "Navigating browser agent to https://www.instagram.com/linguafranca.gcet/",
+        "status": "active",
+        "timestamp": "2026-11-01T07:29:54.197Z"
+      },
+      {
+        "step": 3,
+        "text": "Reading accessible posts and profile header",
+        "status": "active",
+        "timestamp": "2026-11-01T07:30:08.598Z"
+      },
+      {
+        "step": 4,
+        "text": "Inspecting page content for event announcements",
+        "status": "active",
+        "timestamp": "2026-11-01T07:30:08.602Z"
+      },
+      {
+        "step": 5,
+        "text": "Extracting structured event metadata",
+        "status": "active",
+        "timestamp": "2026-11-01T07:30:08.607Z"
+      },
+      {
+        "step": 6,
+        "text": "Saving 0 discovered event(s) to database",
+        "status": "done",
+        "timestamp": "2026-11-01T07:30:08.614Z"
+      }
+    ],
+    "eventsExtracted": 0,
+    "extractedEvents": [],
+    "error": null,
+    "createdAt": "2026-11-01T07:29:54.186Z",
+    "completedAt": "2026-11-01T07:30:08.620Z"
+  }
+]

@@ -43,7 +43,7 @@ export const UnifiedEventsFeed: React.FC<UnifiedEventsFeedProps> = ({
     // Search query
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
-      const matchName = e.event_name.toLowerCase().includes(q);
+      const matchName = (e.event_name || e.title || '').toLowerCase().includes(q);
       const matchDesc = e.description.toLowerCase().includes(q);
       const matchVenue = (e.venue || '').toLowerCase().includes(q);
       const matchCategory = e.category.toLowerCase().includes(q);

@@ -1,6 +1,18 @@
-import React from 'react';
-import { Plus, ExternalLink, RefreshCw, Trash2, Calendar, AlertTriangle, CheckCircle2, Clock, Eye } from 'lucide-react';
-import { InstagramIcon } from './SocialIcons';
+import React, { useState } from 'react';
+import { 
+  Users, 
+  Plus, 
+  ExternalLink, 
+  RefreshCw, 
+  Trash2, 
+  Edit3, 
+  Calendar, 
+  CheckCircle2, 
+  Clock, 
+  ShieldAlert,
+  X
+} from 'lucide-react';
+import { InstagramIcon, LinkedinIcon } from './SocialIcons';
 import type { Club } from '../types';
 
 interface MonitoredClubsProps {
@@ -9,6 +21,7 @@ interface MonitoredClubsProps {
   onScanClub: (club: Club) => void;
   onViewEvents: (club: Club) => void;
   onRemoveClub: (clubId: string) => void;
+  onUpdateClub?: (clubId: string, updates: { name?: string; linkedinUrl?: string | null }) => void;
   scanningClubId: string | null;
 }
 
@@ -18,116 +31,69 @@ export const MonitoredClubs: React.FC<MonitoredClubsProps> = ({
   onScanClub,
   onViewEvents,
   onRemoveClub,
+  onUpdateClub,
   scanningClubId,
 }) => {
-  const getStatusBadge = (club: Club) => {
-    if (scanningClubId === club.id || club.lastScanStatus === 'scanning') {
-      return (
-        <span style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '6px',
-          backgroundColor: 'rgba(139, 92, 246, 0.15)',
-          border: '1px solid var(--primary-purple)',
-          color: '#c4b5fd',
-          fontSize: '12px',
-          padding: '3px 10px',
-          borderRadius: 'var(--radius-full)',
-          fontWeight: 600,
-        }}>
-          <span className="spinner-sm" style={{ width: '10px', height: '10px', borderWidth: '1.5px' }} />
-          Agent Scanning...
-        </span>
-      );
-    }
+  const [clubToDelete, setClubToDelete] = useState<Club | null>(null);
+  const [clubToEdit, setClubToEdit] = useState<Club | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editLinkedin, setEditLinkedin] = useState('');
 
-    if (club.lastScanStatus === 'login_wall') {
-      return (
-        <span style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '6px',
-          backgroundColor: 'rgba(245, 158, 11, 0.12)',
-          border: '1px solid rgba(245, 158, 11, 0.4)',
-          color: 'var(--accent-amber)',
-          fontSize: '12px',
-          padding: '3px 10px',
-          borderRadius: 'var(--radius-full)',
-          fontWeight: 600,
-        }} title={club.lastScanMessage || 'Instagram Login Wall'}>
-          <AlertTriangle size={13} />
-          Login Wall Detected
-        </span>
-      );
-    }
+  const handleOpenEdit = (club: Club) => {
+    setClubToEdit(club);
+    setEditName(club.name);
+    setEditLinkedin(club.linkedinUrl || '');
+  };
 
-    if (club.lastScanStatus === 'success') {
-      return (
-        <span style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '6px',
-          backgroundColor: 'rgba(16, 185, 129, 0.12)',
-          border: '1px solid rgba(16, 185, 129, 0.4)',
-          color: 'var(--accent-emerald)',
-          fontSize: '12px',
-          padding: '3px 10px',
-          borderRadius: 'var(--radius-full)',
-          fontWeight: 600,
-        }}>
-          <CheckCircle2 size={13} />
-          {club.eventCount > 0 ? `${club.eventCount} Event(s) Discovered` : 'Scan Complete (0 events)'}
-        </span>
-      );
-    }
+  const handleSaveEdit = async () => {
+    if (!clubToEdit || !editName.trim()) return;
+    try {
+      const res = await fetch('/api/clubs/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: clubToEdit.id,
+          name: editName.trim(),
+          linkedinUrl: editLinkedin.trim() || null,
+        }),
+      });
 
-    if (club.lastScanStatus === 'failed') {
-      return (
-        <span style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '6px',
-          backgroundColor: 'rgba(239, 68, 68, 0.12)',
-          border: '1px solid rgba(239, 68, 68, 0.4)',
-          color: 'var(--accent-rose)',
-          fontSize: '12px',
-          padding: '3px 10px',
-          borderRadius: 'var(--radius-full)',
-          fontWeight: 600,
-        }}>
-          Scan Failed
-        </span>
-      );
+      if (res.ok && onUpdateClub) {
+        onUpdateClub(clubToEdit.id, {
+          name: editName.trim(),
+          linkedinUrl: editLinkedin.trim() || null,
+        });
+      }
+      setClubToEdit(null);
+    } catch (err) {
+      console.error('Failed to update club:', err);
     }
+  };
 
-    return (
-      <span style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: '6px',
-        backgroundColor: 'rgba(255, 255, 255, 0.04)',
-        border: '1px solid var(--border-subtle)',
-        color: 'var(--text-muted)',
-        fontSize: '12px',
-        padding: '3px 10px',
-        borderRadius: 'var(--radius-full)',
-      }}>
-        <Clock size={12} />
-        Never scanned
-      </span>
-    );
+  const formatLastScanTime = (isoString: string | null) => {
+    if (!isoString) return 'Never scanned';
+    try {
+      const date = new Date(isoString);
+      const diffSecs = Math.floor((Date.now() - date.getTime()) / 1000);
+      if (diffSecs < 60) return 'Just now';
+      if (diffSecs < 3600) return `${Math.floor(diffSecs / 60)} mins ago`;
+      if (diffSecs < 86400) return `${Math.floor(diffSecs / 3600)} hours ago`;
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    } catch {
+      return 'Never scanned';
+    }
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      {/* Page Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '28px', flexWrap: 'wrap', gap: '16px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
         <div>
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 800, color: '#ffffff' }}>
             Monitored Campus Clubs
           </h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '14.5px', marginTop: '4px' }}>
-            College clubs tracked for Instagram event discovery via TinyFish web agents.
+            Official student clubs and chapters monitored by TinyFish agents.
           </p>
         </div>
 
@@ -135,59 +101,59 @@ export const MonitoredClubs: React.FC<MonitoredClubsProps> = ({
           type="button"
           className="btn-primary"
           onClick={onAddClubClick}
-          id="add-club-header-btn"
-          style={{ padding: '10px 22px', fontSize: '14px' }}
+          id="monitored-clubs-add-btn"
         >
           <Plus size={16} />
-          <span>Add Club</span>
+          <span>Add a Club</span>
         </button>
       </div>
 
-      {/* Empty State */}
+      {/* Clubs Grid or Empty State */}
       {clubs.length === 0 ? (
-        <div className="card" style={{
+        <div style={{
+          backgroundColor: 'var(--bg-card)',
+          border: '1px solid var(--border-subtle)',
+          borderRadius: 'var(--radius-lg)',
+          padding: '60px 20px',
           textAlign: 'center',
-          padding: '70px 24px',
-          margin: '30px auto',
-          maxWidth: '560px',
-          width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '16px'
         }}>
           <div style={{
-            width: '64px',
-            height: '64px',
+            width: '54px',
+            height: '54px',
             borderRadius: '50%',
-            backgroundColor: 'rgba(139, 92, 246, 0.1)',
-            border: '1px solid rgba(139, 92, 246, 0.3)',
+            backgroundColor: 'rgba(139, 92, 246, 0.15)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: 'var(--primary-purple)',
-            margin: '0 auto 20px auto',
+            color: 'var(--primary-purple)'
           }}>
-            <Calendar size={28} />
+            <Users size={26} />
           </div>
-
-          <h3 style={{ fontSize: '20px', fontWeight: 700, color: '#ffffff', marginBottom: '8px' }}>
-            No Campus Clubs Added Yet
-          </h3>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '14.5px', marginBottom: '28px', lineHeight: 1.5 }}>
-            Add a club like <strong>Lingua Franca</strong> with its Instagram handle. CampusConnect will use TinyFish agents to inspect its recent posts for event announcements.
-          </p>
-
+          <div>
+            <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#ffffff' }}>No clubs monitored yet</h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '14px', maxWidth: '420px', marginTop: '6px' }}>
+              Add a college club with its Instagram handle to automatically discover and aggregate its events.
+            </p>
+          </div>
           <button
             type="button"
             className="btn-primary"
             onClick={onAddClubClick}
-            id="empty-add-club-btn"
-            style={{ padding: '12px 28px', fontSize: '14.5px' }}
           >
             <Plus size={16} />
-            <span>Add Your First Club</span>
+            <span>Add First Club</span>
           </button>
         </div>
       ) : (
-        /* Clubs Grid */
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: '22px' }}>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
+          gap: '20px'
+        }}>
           {clubs.map((club) => {
             const isScanning = scanningClubId === club.id;
 
@@ -198,21 +164,20 @@ export const MonitoredClubs: React.FC<MonitoredClubsProps> = ({
                 style={{
                   display: 'flex',
                   flexDirection: 'column',
+                  padding: '20px',
                   justifyContent: 'space-between',
-                  padding: '24px',
-                  borderColor: isScanning ? 'var(--primary-purple)' : undefined,
-                  boxShadow: isScanning ? '0 0 20px rgba(139, 92, 246, 0.25)' : undefined,
+                  gap: '16px'
                 }}
               >
                 <div>
-                  {/* Card Header: Club details and Status */}
+                  {/* Top row: Badges & Links */}
                   <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '14px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <div className="instagram-logo-badge" style={{ width: '40px', height: '40px', borderRadius: '10px' }}>
+                      <div className="instagram-logo-badge" style={{ width: '42px', height: '42px', borderRadius: '10px' }}>
                         <InstagramIcon size={20} />
                       </div>
                       <div>
-                        <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#ffffff' }}>
+                        <h3 style={{ fontSize: '17px', fontWeight: 700, color: '#ffffff' }}>
                           {club.name}
                         </h3>
                         <a
@@ -220,13 +185,13 @@ export const MonitoredClubs: React.FC<MonitoredClubsProps> = ({
                           target="_blank"
                           rel="noreferrer"
                           style={{
-                            fontSize: '13.5px',
+                            fontSize: '13px',
                             color: 'var(--primary-purple)',
+                            fontWeight: 600,
                             display: 'inline-flex',
                             alignItems: 'center',
                             gap: '4px',
-                            textDecoration: 'none',
-                            marginTop: '2px',
+                            textDecoration: 'none'
                           }}
                         >
                           <span>{club.handle}</span>
@@ -235,113 +200,276 @@ export const MonitoredClubs: React.FC<MonitoredClubsProps> = ({
                       </div>
                     </div>
 
-                    {getStatusBadge(club)}
+                    {/* Quick edit/remove buttons */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <button
+                        type="button"
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          color: 'var(--text-muted)',
+                          cursor: 'pointer',
+                          padding: '6px',
+                          borderRadius: '6px',
+                        }}
+                        onClick={() => handleOpenEdit(club)}
+                        title="Edit Club"
+                        id={`edit-club-${club.cleanHandle}`}
+                      >
+                        <Edit3 size={15} />
+                      </button>
+
+                      <button
+                        type="button"
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          color: 'var(--text-muted)',
+                          cursor: 'pointer',
+                          padding: '6px',
+                          borderRadius: '6px',
+                        }}
+                        onClick={() => setClubToDelete(club)}
+                        title="Remove Club"
+                        id={`remove-club-${club.cleanHandle}`}
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                    </div>
                   </div>
 
-                  {/* Status explanation or message */}
-                  {club.lastScanStatus === 'login_wall' && (
+                  {/* LinkedIn if configured */}
+                  {club.linkedinUrl && (
                     <div style={{
-                      backgroundColor: 'rgba(245, 158, 11, 0.08)',
-                      border: '1px solid rgba(245, 158, 11, 0.25)',
-                      borderRadius: 'var(--radius-sm)',
-                      padding: '10px 14px',
-                      fontSize: '12.5px',
-                      color: '#fbbf24',
-                      lineHeight: 1.45,
-                      marginBottom: '16px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      fontSize: '12px',
+                      color: 'var(--text-secondary)',
+                      marginBottom: '14px'
                     }}>
-                      <strong>Notice:</strong> Instagram redirected guest requests to a login screen. Meta requires session credentials for this profile.
+                      <LinkedinIcon size={14} />
+                      <a
+                        href={club.linkedinUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        style={{ color: '#38bdf8', textDecoration: 'none' }}
+                      >
+                        LinkedIn Profile
+                      </a>
                     </div>
                   )}
 
-                  {club.lastScanStatus === 'success' && club.eventCount > 0 && (
-                    <div style={{
-                      backgroundColor: 'rgba(16, 185, 129, 0.08)',
-                      border: '1px solid rgba(16, 185, 129, 0.25)',
-                      borderRadius: 'var(--radius-sm)',
-                      padding: '10px 14px',
-                      fontSize: '12.5px',
-                      color: '#34d399',
-                      lineHeight: 1.45,
-                      marginBottom: '16px',
-                    }}>
-                      ✓ Found <strong>{club.eventCount}</strong> announced event(s) associated with {club.name}.
+                  {/* Metrics box */}
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                    gap: '12px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                    padding: '12px 14px',
+                    borderRadius: 'var(--radius-md)',
+                    border: '1px solid var(--border-subtle)',
+                    marginBottom: '14px'
+                  }}>
+                    <div>
+                      <span style={{ fontSize: '11.5px', color: 'var(--text-muted)', display: 'block' }}>
+                        Discovered Events
+                      </span>
+                      <span style={{ fontSize: '18px', fontWeight: 700, color: '#ffffff' }}>
+                        {club.eventCount || 0}
+                      </span>
                     </div>
-                  )}
+
+                    <div>
+                      <span style={{ fontSize: '11.5px', color: 'var(--text-muted)', display: 'block' }}>
+                        Last Actual Scan
+                      </span>
+                      <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                        {formatLastScanTime(club.lastScannedAt)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Status Banner */}
+                  <div style={{ fontSize: '12.5px', marginBottom: '8px' }}>
+                    {isScanning ? (
+                      <span style={{ color: 'var(--primary-purple)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <RefreshCw size={13} style={{ animation: 'spin 1s linear infinite' }} />
+                        <span>Agent Scanning Instagram...</span>
+                      </span>
+                    ) : club.lastScanStatus === 'login_wall' ? (
+                      <span style={{ color: 'var(--accent-amber)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <ShieldAlert size={14} />
+                        <span>Instagram login challenge detected</span>
+                      </span>
+                    ) : club.lastScanStatus === 'success' ? (
+                      <span style={{ color: 'var(--accent-emerald)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <CheckCircle2 size={14} />
+                        <span>Scan complete ({club.eventCount} events)</span>
+                      </span>
+                    ) : (
+                      <span style={{ color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <Clock size={13} />
+                        <span>Ready to scan</span>
+                      </span>
+                    )}
+                  </div>
                 </div>
 
-                {/* Card Action Buttons */}
+                {/* Card Actions */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  paddingTop: '16px',
-                  borderTop: '1px solid rgba(255, 255, 255, 0.05)',
-                  marginTop: '12px',
-                  gap: '10px',
-                  flexWrap: 'wrap',
+                  paddingTop: '14px',
+                  borderTop: '1px solid rgba(255, 255, 255, 0.04)',
+                  gap: '10px'
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    {/* Scan Events button */}
-                    <button
-                      type="button"
-                      className="btn-primary"
-                      onClick={() => onScanClub(club)}
-                      disabled={isScanning}
-                      id={`scan-club-${club.id}`}
-                      style={{
-                        padding: '8px 16px',
-                        fontSize: '13px',
-                        opacity: isScanning ? 0.6 : 1,
-                      }}
-                    >
-                      <RefreshCw size={13} className={isScanning ? 'spinner-sm' : ''} style={isScanning ? { animation: 'spin 1s linear infinite' } : {}} />
-                      <span>{isScanning ? 'Scanning...' : 'Scan Events'}</span>
-                    </button>
-
-                    {/* View Events button */}
-                    <button
-                      type="button"
-                      className="btn-secondary"
-                      onClick={() => onViewEvents(club)}
-                      id={`view-events-${club.id}`}
-                      style={{ padding: '8px 14px', fontSize: '13px' }}
-                    >
-                      <Eye size={13} />
-                      <span>View Events ({club.eventCount})</span>
-                    </button>
-                  </div>
-
-                  {/* Remove Club button */}
                   <button
                     type="button"
-                    onClick={() => {
-                      if (window.confirm(`Are you sure you want to remove "${club.name}" from monitored clubs?`)) {
-                        onRemoveClub(club.id);
-                      }
-                    }}
-                    id={`remove-club-${club.id}`}
-                    style={{
-                      background: 'transparent',
-                      border: 'none',
-                      color: 'var(--text-dim)',
-                      cursor: 'pointer',
-                      padding: '6px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      borderRadius: 'var(--radius-sm)',
-                      transition: 'color var(--transition-fast)',
-                    }}
-                    onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = 'var(--accent-rose)')}
-                    onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = 'var(--text-dim)')}
-                    title="Remove club"
+                    className="btn-secondary"
+                    onClick={() => onViewEvents(club)}
+                    style={{ fontSize: '13px', padding: '7px 14px', flex: 1, justifyContent: 'center' }}
+                    id={`view-events-${club.cleanHandle}`}
                   >
-                    <Trash2 size={16} />
+                    <Calendar size={14} />
+                    <span>View Events</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className="btn-primary"
+                    onClick={() => onScanClub(club)}
+                    disabled={isScanning}
+                    style={{ fontSize: '13px', padding: '7px 16px', flex: 1, justifyContent: 'center' }}
+                    id={`scan-events-btn-${club.cleanHandle}`}
+                  >
+                    <RefreshCw size={14} style={{ animation: isScanning ? 'spin 1s linear infinite' : 'none' }} />
+                    <span>{isScanning ? 'Scanning...' : 'Scan Events'}</span>
                   </button>
                 </div>
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* REMOVE CLUB CONFIRMATION MODAL */}
+      {clubToDelete && (
+        <div className="modal-overlay" onClick={() => setClubToDelete(null)}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '480px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
+              <div style={{
+                width: '36px',
+                height: '36px',
+                borderRadius: '50%',
+                backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'var(--accent-rose)'
+              }}>
+                <Trash2 size={18} />
+              </div>
+              <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#ffffff' }}>
+                Remove {clubToDelete.name}?
+              </h3>
+            </div>
+
+            <p style={{ color: 'var(--text-secondary)', fontSize: '14px', lineHeight: 1.6, marginBottom: '20px' }}>
+              Are you sure you want to remove <strong>{clubToDelete.name}</strong> ({clubToDelete.handle}) from monitored clubs? TinyFish will stop automated scanning for this club.
+            </p>
+
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '12px' }}>
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => setClubToDelete(null)}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                className="btn-primary"
+                onClick={() => {
+                  onRemoveClub(clubToDelete.id);
+                  setClubToDelete(null);
+                }}
+                style={{ backgroundColor: 'var(--accent-rose)' }}
+                id="confirm-remove-club-btn"
+              >
+                Remove Club
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* EDIT CLUB MODAL */}
+      {clubToEdit && (
+        <div className="modal-overlay" onClick={() => setClubToEdit(null)}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '480px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+              <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#ffffff' }}>
+                Edit Club
+              </h3>
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => setClubToEdit(null)}
+                style={{ padding: '6px', borderRadius: '50%' }}
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div>
+                <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
+                  Club Name
+                </label>
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="handle-text-input"
+                  style={{ backgroundColor: 'var(--bg-input)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '8px 12px' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
+                  LinkedIn Profile URL (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={editLinkedin}
+                  onChange={(e) => setEditLinkedin(e.target.value)}
+                  placeholder="https://linkedin.com/..."
+                  className="handle-text-input"
+                  style={{ backgroundColor: 'var(--bg-input)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '8px 12px' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '10px', marginTop: '14px' }}>
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => setClubToEdit(null)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="btn-primary"
+                  onClick={handleSaveEdit}
+                >
+                  Save Changes
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -72,7 +72,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
               }}
             >
               <div>
-                <span style={{ fontWeight: 600, color: '#ffffff' }}>{evt.event_name}</span>
+                <span style={{ fontWeight: 600, color: '#ffffff' }}>{evt.title || evt.event_name}</span>
                 <span style={{ color: 'var(--text-muted)', marginLeft: '8px', fontSize: '12px' }}>
                   ({evt.date || 'TBD'})
                 </span>

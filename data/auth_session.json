@@ -1,0 +1,12 @@
+{
+  "profileId": "prof_2e8ad9c73af146a8",
+  "profileName": "CampusConnect Instagram Session",
+  "status": "connected",
+  "signedInSites": [
+    "instagram.com"
+  ],
+  "lastConnectedAt": "2026-11-01T07:44:47.999Z",
+  "expiresAt": "2026-11-01T07:59:41.262Z",
+  "activeSessionId": null,
+  "setupBaseUrl": "https://ip-3-101-153-112.tetra-data.production.tinyfish.io/tf-2b5c627e-9313-4fba-a2ca-27564ef4722c"
+}
