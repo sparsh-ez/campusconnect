@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { InstagramIcon, LinkedinIcon } from './SocialIcons';
 import type { Club } from '../types';
+import { apiUrl } from '../utils/api';
 
 interface MonitoredClubsProps {
   clubs: Club[];
@@ -48,7 +49,7 @@ export const MonitoredClubs: React.FC<MonitoredClubsProps> = ({
   const handleSaveEdit = async () => {
     if (!clubToEdit || !editName.trim()) return;
     try {
-      const res = await fetch('/api/clubs/update', {
+      const res = await fetch(apiUrl('/api/clubs/update'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

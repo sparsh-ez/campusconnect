@@ -49,12 +49,58 @@ function parseBody(req: IncomingMessage): Promise<any> {
   });
 }
 
+// Calculate allowed CORS origin based on FRONTEND_ORIGIN and request origin
+export function getCorsOrigin(req: IncomingMessage): string | null {
+  const allowedOriginEnv = process.env.FRONTEND_ORIGIN;
+  const requestOrigin = (req.headers.origin as string | undefined)?.trim();
+
+  // Local development origins that are always permitted
+  const devOrigins = [
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'http://localhost:4173',
+    'http://127.0.0.1:4173',
+  ];
+
+  if (allowedOriginEnv) {
+    const configuredOrigins = allowedOriginEnv.split(',').map(o => o.trim().replace(/\/+$/, ''));
+    if (requestOrigin) {
+      const cleanReqOrigin = requestOrigin.replace(/\/+$/, '');
+      if (configuredOrigins.includes(cleanReqOrigin) || devOrigins.includes(cleanReqOrigin)) {
+        return requestOrigin;
+      }
+      return null;
+    }
+    return configuredOrigins[0];
+  }
+
+  // If FRONTEND_ORIGIN is not configured:
+  if (process.env.NODE_ENV === 'production') {
+    if (requestOrigin && devOrigins.includes(requestOrigin.replace(/\/+$/, ''))) {
+      return requestOrigin;
+    }
+    return null;
+  }
+
+  return requestOrigin || '*';
+}
+
+export function setCorsHeaders(req: IncomingMessage, res: ServerResponse) {
+  const origin = getCorsOrigin(req);
+  if (origin) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  res.setHeader('Access-Control-Max-Age', '86400');
+  res.setHeader('Vary', 'Origin');
+}
+
 function sendJson(res: ServerResponse, statusCode: number, data: any) {
   res.statusCode = statusCode;
   res.setHeader('Content-Type', 'application/json');
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.end(JSON.stringify(data));
 }
 
@@ -240,8 +286,15 @@ export async function handleApiRequest(req: IncomingMessage, res: ServerResponse
   const parsedUrl = new URL(rawUrl, 'http://localhost');
   const pathname = parsedUrl.pathname;
 
+  if (!pathname.startsWith('/api')) {
+    return false;
+  }
+
+  setCorsHeaders(req, res);
+
   if (req.method === 'OPTIONS') {
-    sendJson(res, 204, {});
+    res.statusCode = 204;
+    res.end();
     return true;
   }
 

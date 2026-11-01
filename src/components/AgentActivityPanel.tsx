@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import type { Club, CampusEvent } from '../types';
 import type { DemoEventTemplate } from '../data/demoEvents';
+import { apiUrl } from '../utils/api';
 
 export interface StageDefinition {
   id: number;
@@ -82,7 +83,7 @@ export const AgentActivityPanel: React.FC<AgentActivityPanelProps> = ({
   // 1. Fetch demo templates for this club at start
   useEffect(() => {
     let isMounted = true;
-    fetch(`/api/demo/events?clubId=${encodeURIComponent(club.id)}&handle=${encodeURIComponent(club.handle)}&name=${encodeURIComponent(club.name)}`)
+    fetch(apiUrl(`/api/demo/events?clubId=${encodeURIComponent(club.id)}&handle=${encodeURIComponent(club.handle)}&name=${encodeURIComponent(club.name)}`))
       .then(res => res.json())
       .then(data => {
         if (isMounted && data.events) {
@@ -151,7 +152,7 @@ export const AgentActivityPanel: React.FC<AgentActivityPanelProps> = ({
         if (i === 5) {
           if (!cancelledRef.current && discoveredTemplates.length > 0) {
             try {
-              const res = await fetch('/api/demo/save', {
+              const res = await fetch(apiUrl('/api/demo/save'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

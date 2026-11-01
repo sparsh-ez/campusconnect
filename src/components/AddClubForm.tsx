@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ArrowLeft, Sparkles, AlertCircle, Loader2 } from 'lucide-react';
 import { InstagramIcon } from './SocialIcons';
 import type { Club } from '../types';
+import { apiUrl, parseJsonResponse } from '../utils/api';
 
 interface AddClubFormProps {
   onBack: () => void;
@@ -32,13 +33,13 @@ export const AddClubForm: React.FC<AddClubFormProps> = ({ onBack, onClubAdded })
     setErrorMsg('');
 
     try {
-      const res = await fetch('/api/clubs', {
+      const res = await fetch(apiUrl('/api/clubs'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: trimmedName, handle: trimmedHandle }),
       });
 
-      const data = await res.json();
+      const data = await parseJsonResponse(res);
 
       if (!res.ok || data.error) {
         setErrorMsg(data.error || 'Failed to add club.');

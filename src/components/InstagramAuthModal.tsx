@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { InstagramIcon } from './SocialIcons';
 import type { InstagramAuthSession } from '../types';
+import { apiUrl } from '../utils/api';
 
 interface InstagramAuthModalProps {
   onClose: () => void;
@@ -43,7 +44,7 @@ export const InstagramAuthModal: React.FC<InstagramAuthModalProps> = ({
     setSuccessMsg(null);
 
     try {
-      const res = await fetch('/api/auth/instagram/start', {
+      const res = await fetch(apiUrl('/api/auth/instagram/start'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -79,7 +80,7 @@ export const InstagramAuthModal: React.FC<InstagramAuthModalProps> = ({
     setErrorMsg(null);
 
     try {
-      const res = await fetch('/api/auth/instagram/save', {
+      const res = await fetch(apiUrl('/api/auth/instagram/save'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -110,7 +111,7 @@ export const InstagramAuthModal: React.FC<InstagramAuthModalProps> = ({
   // Disconnect Session
   const handleDisconnect = async () => {
     try {
-      const res = await fetch('/api/auth/instagram/disconnect', { method: 'POST' });
+      const res = await fetch(apiUrl('/api/auth/instagram/disconnect'), { method: 'POST' });
       if (res.ok) {
         onSessionUpdated({
           profileId: session?.profileId || 'prof_2e8ad9c73af146a8',

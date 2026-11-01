@@ -18,6 +18,7 @@ import type {
   NavTab,
   InstagramAuthSession
 } from './types';
+import { apiUrl } from './utils/api';
 
 export const App: React.FC = () => {
   const [currentTab, setCurrentTab] = useState<NavTab>('home');
@@ -72,7 +73,7 @@ export const App: React.FC = () => {
 
   const fetchInstagramSession = async () => {
     try {
-      const res = await fetch('/api/auth/instagram/status');
+      const res = await fetch(apiUrl('/api/auth/instagram/status'));
       if (res.ok) {
         const data = await res.json();
         setInstagramSession(data.session);
@@ -84,7 +85,7 @@ export const App: React.FC = () => {
 
   const fetchTinyFishStatus = async () => {
     try {
-      const res = await fetch('/api/status');
+      const res = await fetch(apiUrl('/api/status'));
       if (res.ok) {
         const data = await res.json();
         setTinyFishStatus({ configured: data.configured, wallet: data.wallet });
@@ -96,7 +97,7 @@ export const App: React.FC = () => {
 
   const fetchClubs = async () => {
     try {
-      const res = await fetch('/api/clubs');
+      const res = await fetch(apiUrl('/api/clubs'));
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data.clubs)) {
@@ -110,7 +111,7 @@ export const App: React.FC = () => {
 
   const fetchEvents = async () => {
     try {
-      const res = await fetch('/api/events');
+      const res = await fetch(apiUrl('/api/events'));
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data.events)) {
@@ -124,7 +125,7 @@ export const App: React.FC = () => {
 
   const fetchStats = async () => {
     try {
-      const res = await fetch('/api/stats');
+      const res = await fetch(apiUrl('/api/stats'));
       if (res.ok) {
         const data = await res.json();
         if (data.stats) {
@@ -146,7 +147,7 @@ export const App: React.FC = () => {
   // Remove Club Handler
   const handleRemoveClub = async (clubId: string) => {
     try {
-      const res = await fetch('/api/clubs/delete', {
+      const res = await fetch(apiUrl('/api/clubs/delete'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: clubId }),
@@ -181,7 +182,7 @@ export const App: React.FC = () => {
   // View specific club events
   const fetchEventsForClub = async (clubId: string) => {
     try {
-      const res = await fetch(`/api/events?clubId=${encodeURIComponent(clubId)}`);
+      const res = await fetch(apiUrl(`/api/events?clubId=${encodeURIComponent(clubId)}`));
       if (res.ok) {
         const data = await res.json();
         setClubSpecificEvents(data.events || []);

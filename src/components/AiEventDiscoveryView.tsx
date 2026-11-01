@@ -16,6 +16,7 @@ import {
 import { InstagramIcon, LinkedinIcon } from './SocialIcons';
 import { AgentActivityPanel } from './AgentActivityPanel';
 import type { CampusEvent, Club, InstagramAuthSession } from '../types';
+import { apiUrl, parseJsonResponse } from '../utils/api';
 
 interface AiEventDiscoveryViewProps {
   clubs: Club[];
@@ -90,7 +91,7 @@ export const AiEventDiscoveryView: React.FC<AiEventDiscoveryViewProps> = ({
 
     setIsSavingClub(true);
     try {
-      const res = await fetch('/api/clubs', {
+      const res = await fetch(apiUrl('/api/clubs'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -100,7 +101,7 @@ export const AiEventDiscoveryView: React.FC<AiEventDiscoveryViewProps> = ({
         }),
       });
 
-      const data = await res.json();
+      const data = await parseJsonResponse(res);
       if (!res.ok) {
         setFormError(data.error || 'Failed to save club.');
         setIsSavingClub(false);
@@ -152,13 +153,13 @@ export const AiEventDiscoveryView: React.FC<AiEventDiscoveryViewProps> = ({
     setIsPublishing(true);
 
     try {
-      const res = await fetch('/api/events/publish', {
+      const res = await fetch(apiUrl('/api/events/publish'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ eventIds: selectedEventIds }),
       });
 
-      const data = await res.json();
+      const data = await parseJsonResponse(res);
       setIsPublishing(false);
       setShowConfirmModal(false);
 
@@ -183,7 +184,7 @@ export const AiEventDiscoveryView: React.FC<AiEventDiscoveryViewProps> = ({
   // Save edited event
   const handleSaveEditedEvent = async (updated: CampusEvent) => {
     try {
-      const res = await fetch('/api/events/update', {
+      const res = await fetch(apiUrl('/api/events/update'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updated),
